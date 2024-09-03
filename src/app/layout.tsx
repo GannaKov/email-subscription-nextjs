@@ -1,8 +1,6 @@
 import React from 'react';
 import './globals.css';
 import { inter } from '@/app/ui/fonts';
-import Header from './ui/header';
-import Footer from './ui/footer';
 
 //import { Metadata } from 'next';
 
@@ -23,9 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        <Header />
         {children}
-        <Footer />
       </body>
     </html>
   );
