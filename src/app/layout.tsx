@@ -22,6 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
         {children}
+        <div id="modal-container" />
       </body>
     </html>
   );
