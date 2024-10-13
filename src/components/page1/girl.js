@@ -12,9 +12,9 @@ function GirlModel() {
   const gltf = useLoader(GLTFLoader, '/models/Michelle.glb');
   console.log('GLTF loaded:', gltf);
   const { animations, scene } = gltf;
-  console.log('Animations:', animations);
+
   const { ref, mixer } = useAnimations(animations, scene);
-  console.log('Scene loaded:', scene);
+
   scene.scale.set(1, 1, 1);
 
   useFrame((state, delta) => {
@@ -33,6 +33,8 @@ function GirlModel() {
     console.log(' No scene');
     return null;
   }
+  console.log('Scene', scene);
+  console.log('Animations:', animations);
 
   return <primitive object={scene} />;
 }

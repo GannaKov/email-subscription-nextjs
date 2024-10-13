@@ -1,79 +1,84 @@
-// components/ThreeScene.js
+// components/GirlModel.js
+// src/GirlModel.js
 'use client';
+// src/GirlModel.js
+// src/GirlModel.js
 import React, { useEffect, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
-function GirlModel() {
-  const modelRef = useRef();
-  const mixerRef = useRef();
-  const pointCloudRefs = useRef([]);
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // Правильный импорт GLTFLoader
+
+const GirlModel = () => {
+  const mountRef = useRef(null);
+  const mixerRef = useRef(null);
+  const clockRef = useRef(new THREE.Clock());
 
   useEffect(() => {
-    const loader = new GLTFLoader();
-    loader.load('/models/Michelle.glb', (gltf) => {
-      const object = gltf.scene;
-      const animations = gltf.animations;
-      mixerRef.current = new THREE.AnimationMixer(object);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      window.innerWidth / window.innerHeight,
+      1,
+      1000
+    );
+    camera.position.set(0, 300, -85);
+    camera.lookAt(0, 0, -85);
 
-      // Проходим по всем анимациям
-      animations.forEach((clip) => {
-        const action = mixerRef.current.clipAction(clip);
-        action.play();
-      });
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    mountRef.current.appendChild(renderer.domElement);
+
+    const loader = new GLTFLoader();
+    loader.load('models/Michelle.glb', (gltf) => {
+      const object = gltf.scene;
+      mixerRef.current = new THREE.AnimationMixer(object);
+      const action = mixerRef.current.clipAction(gltf.animations[0]);
+      action.play();
 
       object.traverse((child) => {
         if (child.isMesh) {
-          const geometry = child.geometry.clone();
-          const material = new THREE.PointsMaterial({
-            color: 'white',
-            size: 0.05,
-          });
+          child.visible = false;
 
-          const pointCloud = new THREE.Points(geometry, material);
-          modelRef.current.add(pointCloud);
-          pointCloudRefs.current.push(pointCloud);
-          child.visible = false; // Скрываем оригинальный меш
+          // Создание облака точек с использованием MeshBasicMaterial
+          const pointsMaterial = new THREE.PointsMaterial({
+            color: 0xff0000,
+            size: 5,
+          }); // Задайте нужный цвет и размер точек
+          const pointCloud = new THREE.Points(child.geometry, pointsMaterial);
+          scene.add(pointCloud);
         }
       });
 
-      // Добавляем объект в сцену
-      modelRef.current.add(object);
+      scene.add(object);
     });
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+
+      const delta = clockRef.current.getDelta();
+      if (mixerRef.current) mixerRef.current.update(delta);
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    const onWindowResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener('resize', onWindowResize);
+
+    return () => {
+      mountRef.current.removeChild(renderer.domElement);
+      window.removeEventListener('resize', onWindowResize);
+      if (mixerRef.current) mixerRef.current.stopAllAction();
+    };
   }, []);
 
-  useFrame((state, delta) => {
-    if (mixerRef.current) {
-      mixerRef.current.update(delta); // Обновляем анимацию
-    }
+  return <div ref={mountRef} style={{ width: '100%', height: '100vh' }} />;
+};
 
-    // Обновляем позиции точек
-    pointCloudRefs.current.forEach((pointCloud, index) => {
-      const originalMesh = modelRef.current.children[index]; // Оригинальный меш по индексу
-      if (originalMesh && pointCloud) {
-        pointCloud.geometry.attributes.position.array.set(
-          originalMesh.geometry.attributes.position.array
-        );
-        pointCloud.geometry.attributes.position.needsUpdate = true; // Указываем, что позиции обновлены
-      }
-    });
-  });
-
-  return <group ref={modelRef} />;
-}
-
-export default function Girl() {
-  return (
-    <div className="h-full w-full">
-      <h1>New GIRL</h1>
-      <div className="h-[900px] overflow-auto">
-        <Canvas camera={{ position: [0, 2, 8], fov: 50 }}>
-          <ambientLight intensity={0.8} />
-          <directionalLight position={[5, 5, 5]} intensity={1} />
-          <directionalLight position={[-5, -5, -5]} intensity={0.5} />
-          <GirlModel />
-        </Canvas>
-      </div>
-    </div>
-  );
-}
+export default GirlModel;
