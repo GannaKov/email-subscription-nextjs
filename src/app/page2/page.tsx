@@ -10,9 +10,9 @@ export default function Page2({}: Page2Props) {
   return (
     <main className="flex flex-col items-center">
       <h1>Kuku</h1>
-      {/* <SkinnedPoints /> */}
+      <SkinnedPoints />
       {/* <SkinnedGirl /> */}
-      <NewGirl />
+      {/* <NewGirl /> */}
     </main>
   );
 }

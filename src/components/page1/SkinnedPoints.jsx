@@ -1,113 +1,79 @@
 // components/ThreeScene.js
 'use client';
 import React, { useEffect, useRef } from 'react';
-import * as THREE from 'three';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-
-const SkinnedPoints = () => {
-  const containerRef = useRef(null);
+import * as THREE from 'three';
+function GirlModel() {
+  const modelRef = useRef();
+  const mixerRef = useRef();
+  const pointCloudRefs = useRef([]);
 
   useEffect(() => {
-    let camera, scene, renderer, mixer, clock;
+    const loader = new GLTFLoader();
+    loader.load('/models/Michelle.glb', (gltf) => {
+      const object = gltf.scene;
+      const animations = gltf.animations;
+      mixerRef.current = new THREE.AnimationMixer(object);
 
-    const init = () => {
-      // Set up the scene
-      scene = new THREE.Scene();
-
-      // Camera setup
-      camera = new THREE.PerspectiveCamera(
-        50,
-        window.innerWidth / window.innerHeight,
-        1,
-        1000
-      );
-      // camera.position.set(0, 300, -85);
-      camera.position.set(0, 150, 200);
-      //camera.lookAt(0, 0, -85);
-      camera.lookAt(0, 50, 0);
-
-      // Clock for animations
-      clock = new THREE.Clock();
-
-      // Renderer setup (using WebGLRenderer instead of WebGPURenderer)
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(
-        containerRef.current.clientWidth,
-        containerRef.current.clientHeight
-      );
-      containerRef.current.appendChild(renderer.domElement);
-
-      // Load GLTF model
-      const loader = new GLTFLoader();
-      loader.load('/models/Michelle.glb', (gltf) => {
-        const object = gltf.scene;
-        mixer = new THREE.AnimationMixer(object);
-
-        const action = mixer.clipAction(gltf.animations[0]);
+      // Проходим по всем анимациям
+      animations.forEach((clip) => {
+        const action = mixerRef.current.clipAction(clip);
         action.play();
-
-        object.traverse((child) => {
-          if (child.isMesh) {
-            child.visible = false;
-
-            const materialPoints = new THREE.PointsMaterial({
-              color: 0xffffff,
-              size: 2,
-              sizeAttenuation: true,
-            });
-            const pointCloud = new THREE.Points(child.geometry, materialPoints);
-            scene.add(pointCloud);
-          }
-        });
-
-        scene.add(object);
       });
 
-      // Handle window resize
-      window.addEventListener('resize', onWindowResize);
+      object.traverse((child) => {
+        if (child.isMesh) {
+          const geometry = child.geometry.clone();
+          const material = new THREE.PointsMaterial({
+            color: 'white',
+            size: 0.05,
+          });
 
-      animate();
-    };
+          const pointCloud = new THREE.Points(geometry, material);
+          modelRef.current.add(pointCloud);
+          pointCloudRefs.current.push(pointCloud);
+          child.visible = false; // Скрываем оригинальный меш
+        }
+      });
 
-    const onWindowResize = () => {
-      camera.aspect =
-        containerRef.current.clientWidth / containerRef.current.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(
-        containerRef.current.clientWidth,
-        containerRef.current.clientHeight
-      );
-    };
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-
-      const delta = clock.getDelta();
-      if (mixer) mixer.update(delta);
-
-      renderer.render(scene, camera);
-    };
-
-    init();
-
-    return () => {
-      // Cleanup when component unmounts
-      // Cleanup when component unmounts
-      if (renderer && containerRef.current) {
-        containerRef.current.removeChild(renderer.domElement);
-      }
-      window.removeEventListener('resize', onWindowResize);
-    };
+      // Добавляем объект в сцену
+      modelRef.current.add(object);
+    });
   }, []);
 
+  useFrame((state, delta) => {
+    if (mixerRef.current) {
+      mixerRef.current.update(delta); // Обновляем анимацию
+    }
+
+    // Обновляем позиции точек
+    pointCloudRefs.current.forEach((pointCloud, index) => {
+      const originalMesh = modelRef.current.children[index]; // Оригинальный меш по индексу
+      if (originalMesh && pointCloud) {
+        pointCloud.geometry.attributes.position.array.set(
+          originalMesh.geometry.attributes.position.array
+        );
+        pointCloud.geometry.attributes.position.needsUpdate = true; // Указываем, что позиции обновлены
+      }
+    });
+  });
+
+  return <group ref={modelRef} />;
+}
+
+export default function Girl() {
   return (
     <div className="h-full w-full">
-      <div className="h-[900px] w-full">
-        <div ref={containerRef} />
+      <h1>New GIRL</h1>
+      <div className="h-[900px] overflow-auto">
+        <Canvas camera={{ position: [0, 2, 8], fov: 50 }}>
+          <ambientLight intensity={0.8} />
+          <directionalLight position={[5, 5, 5]} intensity={1} />
+          <directionalLight position={[-5, -5, -5]} intensity={0.5} />
+          <GirlModel />
+        </Canvas>
       </div>
     </div>
   );
-};
-
-export default SkinnedPoints;
+}
