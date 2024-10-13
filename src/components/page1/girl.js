@@ -34,11 +34,6 @@ function GirlModel() {
     return null;
   }
 
-  // return (
-  //   <Points ref={ref} args={[scene.geometry]}>
-  //     <pointsMaterial attach="material" color="skyblue" size={0.01} />
-  //   </Points>
-  // );
   return <primitive object={scene} />;
 }
 
