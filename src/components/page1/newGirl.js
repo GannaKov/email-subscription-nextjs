@@ -37,7 +37,7 @@ function GirlModel() {
       // Применяем стандартный материал, поддерживающий skinning
       child.material = new THREE.MeshStandardMaterial({
         color: 0xffffff,
-        skinning: true,
+        skinning: true,// delete?
       });
     }
   });
