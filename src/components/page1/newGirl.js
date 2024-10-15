@@ -13,6 +13,7 @@ function GirlModel() {
 
   const { ref, mixer } = useAnimations(animations, scene);
 
+  console.log('animations', animations);
   scene.scale.set(1, 1, 1);
 
   useFrame((state, delta) => {
@@ -37,10 +38,12 @@ function GirlModel() {
       // Применяем стандартный материал, поддерживающий skinning
       child.material = new THREE.MeshStandardMaterial({
         color: 0xffffff,
-        skinning: true,// delete?
+
+        skinning: true, // delete?
       });
     }
   });
+  console.log('scene', scene);
 
   return <primitive object={scene} ref={ref} />;
 }

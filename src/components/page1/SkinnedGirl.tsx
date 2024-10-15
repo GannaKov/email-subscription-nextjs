@@ -45,7 +45,7 @@ function SkinnedGirl() {
 
           const materialPoints = new THREE.PointsMaterial({
             color: 0xffffff,
-            size: 1,
+            size: 0.02,
           });
           const pointCloud = new THREE.Points(
             (child as THREE.Mesh).geometry,

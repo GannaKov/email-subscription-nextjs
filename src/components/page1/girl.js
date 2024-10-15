@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-
+// colored girl Dance !!!!
 // import { uniform, skinning } from 'three/tsl';
 import { Canvas, useLoader, useFrame } from '@react-three/fiber';
 import { OrbitControls, Points, useAnimations } from '@react-three/drei';
@@ -13,8 +13,15 @@ function GirlModel() {
   console.log('GLTF loaded:', gltf);
   const { animations, scene } = gltf;
 
-  const { ref, mixer } = useAnimations(animations, scene);
-
+  const { ref, mixer, names, actions, clips } = useAnimations(
+    animations,
+    scene
+  );
+  console.log('ref', ref);
+  console.log(' mixer', mixer);
+  console.log('names', names);
+  console.log('actions', actions);
+  console.log('clips', clips);
   scene.scale.set(1, 1, 1);
 
   useFrame((state, delta) => {
