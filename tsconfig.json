@@ -28,7 +28,9 @@
     ".next/types/**/*.ts",
     "src/components/page1/girl.js",
     "src/components/page1/new-girls.jsx",
-    "src/components/page1/exp.js"
+    "src/components/page1/exp.js",
+    "src/components/page1/NewNewGirl.jsx",
+    "src/components/page1/SkinnedGirl.js"
   ],
   "exclude": ["node_modules"]
 }
