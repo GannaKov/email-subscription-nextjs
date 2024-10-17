@@ -39,7 +39,7 @@ function GirlModel() {
       child.material = new THREE.MeshStandardMaterial({
         color: 0xffffff,
 
-        skinning: true, // delete?
+        // skinning: true, // delete?
       });
     }
   });
@@ -51,7 +51,7 @@ function GirlModel() {
 export default function NewGirl() {
   return (
     <div className="h-full w-full">
-      <h1>New GIRL</h1>
+      <h1>New GIRL!</h1>
       <div className="h-[900px]">
         <Canvas
           camera={{ position: [0, 1, 5], fov: 50 }}
